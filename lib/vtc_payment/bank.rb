@@ -2,4 +2,4 @@ module VtcPayment
   module Bank
   end
 end
-require "bank/request"
+require "vtc_payment/bank/request"

@@ -143,16 +143,3 @@ module VtcPayment
   end
 end
 
-if $0 == __FILE__
-  req = VtcPayment::Bank::Request::CreditCard::Visa.new("0986699482", "5168", "ThisIsAPublicKeyForYmeet.Me12345", "https://m.ymeet.me/blog/")
-  req.sandbox = true
-  params = {
-    amount: 100_000,
-    order_id: Time.now.strftime("%Y%m%e%H%M%S"),
-    first_name: "tomokazu",
-    last_name: "imamura",
-    mobile: "099-000-0000",
-    email: "imamura@mmj.vn",
-  }
-  puts req.url(params)
-end

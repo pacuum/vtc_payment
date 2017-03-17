@@ -240,13 +240,3 @@ module VtcPayment
     end
   end
 end
-
-if $0 == __FILE__
-  $:.unshift File.dirname(__FILE__)
-  require "crypt"
-  require "date"
-  client = VtcPayment::MobileCard::Client.new("920130506", "920130506!@#123")
-  client.sandbox = true
-  res =  client.execute("707970449377", "PM0000008573", "VTEL|2017031601|your name")
-  p [ res.successful?, res.code, res.message ]
-end

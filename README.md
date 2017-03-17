@@ -24,7 +24,7 @@ Or install it yourself as:
 
 #### Specific bank
 ```ruby
-  req = VtcPayment::Bank::Request::Bank::Vietcombank.new("YOURACCOUNT", 9999, "your secret key", "https://your.web.site/")
+  req = VtcPayment::Bank::Request::Bank::Vietcombank.new("ACCOUNT", 9999, "SECRET_KEY", "https://your.web.site/")
   req.sandbox = true
   params = {
     amount: 100_000, # VND
@@ -32,17 +32,37 @@ Or install it yourself as:
   }
   puts req.url(params)
 ```
+See official document for available list of Bank names. Note that in the sandbox environment bank transfer will not work.
 
-#### VISA Credit card
+#### VISA/Master Credit card
 ```ruby
   req = VtcPayment::Bank::Request::CreditCard::Visa.new(account, website_id, secret_key, callback_url)
   puts req.url(params)
 ```
-The only difference is the class to instantiate.
+```ruby
+  req = VtcPayment::Bank::Request::CreditCard::Master.new(account, website_id, secret_key, callback_url)
+  puts req.url(params)
+```
+The only difference among all cases is the class to instantiate.
 
+#### Handling users response
+When bank/credit card payment is successful, user is redirected to callback_url with parameter.
+```ruby
+parser = VtpPayment::NotificationParser.new(SECRET_KEY)
+result = parser.parse_users_request(params)
+p [ result.successful?, result.code, result.message ]
+
+```
+
+#### Notification API
+```ruby
+parser = VtpPayment::NotificationParser.new(SECRET_KEY)
+result = parser.parse_notification(data, signature)
+p [ result.successful?, result.code, result.message ]
+
+```
 
 ### Mobile card
-
 ```ruby
   client = VtcPayment::MobileCard::Client.new("ACCOUNT", "SECRET_KEY")
   client.sandbox = true
