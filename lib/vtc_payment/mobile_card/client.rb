@@ -7,6 +7,9 @@ require "logger"
 module VtcPayment
   module MobileCard
     class Client
+      class << self
+        attr_accessor :production_url # class_attribute
+      end
       attr_accessor :sandbox
       def initialize( partner_id, secret_key )
         @partner_id = partner_id
@@ -14,10 +17,10 @@ module VtcPayment
       end
 
       SANDBOX_URL = 'http://sandbox2.vtcebank.vn/WSCard2010/card.asmx?wsdl'
-      PRODUCTION_URL = "" # ??
+      # I'm not sure if I can publish production url so I made it as class configuration
 
       def url
-        sandbox? ? SANDBOX_URL : (raise "production url is not yet given from vtc")# PRODUCTION_URL
+        sandbox? ? SANDBOX_URL : self.class.production_url
       end
 
       def sandbox?
@@ -37,8 +40,7 @@ module VtcPayment
         response
       end
 
-      private
-      def send_request( cardid, cardcode, des)
+      def build_xml_data( cardid, cardcode, des )
         cardfun = <<-EOS
         <?xml version="1.0" encoding="utf-16"?>
         <CardRequest>
@@ -61,9 +63,11 @@ module VtcPayment
           </soap:Body>
         </soap:Envelope>
         EOS
-        # if there are unnecessary spaces VTC will reject you
+        # if there are unnecessary spaces between tags it is rejected. maybe soap requirement?
         xml_data = xml_data.gsub(/\>\s+\</, "><").strip
+      end
 
+      def build_headers( url, xml_data )
         uri = URI.parse(url)
         headers = {
           "Host" => "#{uri.host}",
@@ -71,16 +75,19 @@ module VtcPayment
           "SOAPAction" => "VTCOnline.Card.WebAPI/Request",
           "Content-Length" => "#{xml_data.length}"
         }
+      end
 
+      private
+      def send_request( cardid, cardcode, des)
+        xml_data = build_xml_data(cardid, cardcode, des)
+        headers = build_headers( url, xml_data )
 
-        # client = HTTPClient.new
         http_res = nil
         begin
-          log [ :request, uri.to_s, headers, cardfun, xml_data ].to_json
-          http_res = post( uri.to_s, headers, xml_data )
+          log [ :request, url, headers, cardfun, xml_data ].to_json
+          http_res = post( url, headers, xml_data )
         rescue => ex
           log [ :exception, ex.to_s, ex.message ].to_json
-          # TODO: send email?
           return nil # we need to return nil because we have to process next card 
         ensure
           if http_res && http_res.respond_to?(:body)
@@ -110,12 +117,16 @@ module VtcPayment
       end
 
       def log( str )
-        if defined?(Rails)
-          @logger ||= Logger.new("#{Rails.root}/logs/vtc_mobile.log")
-        else
-          @logger ||= Logger.new("vtc_mobile.log")
-        end
+        @logger ||= Logger.new("#{log_dir}/vtc_mobile.log")
         @logger.info str.to_s
+      end
+
+      def log_dir
+        if defined?(Rails)
+          "#{Rails.root}/logs"
+        else
+          "."
+        end
       end
 
       class FailedByException

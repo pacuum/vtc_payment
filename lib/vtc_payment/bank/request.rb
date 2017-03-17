@@ -28,6 +28,9 @@ require "date"
 module VtcPayment
   module Bank
     class Request
+      class << self
+        attr_accessor :production_url # class_attribute
+      end
       attr_accessor :sandbox
       def initialize( account, website_id, secret_key, callback_url )
         @account = account.to_s
@@ -48,7 +51,7 @@ module VtcPayment
 
       def base_url
         # from pdf document
-        sandbox? ? "http://sandbox1.vtcebank.vn/pay.vtc.vn/cong-thanh-toan/checkout.html" : "https://pay.vtc.vn/cong-thanh-toan/checkout.html"
+        sandbox? ? "http://sandbox1.vtcebank.vn/pay.vtc.vn/cong-thanh-toan/checkout.html" : self.class.production_url
       end
 
       # If you want to limit payment type, choose sub classes defined below

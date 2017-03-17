@@ -24,6 +24,7 @@ Or install it yourself as:
 
 #### Specific bank
 ```ruby
+VtcPayment::Bank::Request.production_url = "...." # set if you want to run in production
 req = VtcPayment::Bank::Request::Bank::Vietcombank.new("ACCOUNT", 9999, "SECRET_KEY", "https://your.web.site/")
 req.sandbox = true
 params = {
@@ -63,6 +64,7 @@ p [ result.successful?, result.order_id, result.amount, result.code, result.mess
 
 ### Mobile card
 ```ruby
+VtcPayment::MobileCard::Client.production_url = "..." # set if you use in production
 client = VtcPayment::MobileCard::Client.new("ACCOUNT", "SECRET_KEY")
 client.sandbox = true
 client =  result.execute("CARDID", "SERIAL", "any information of your customer")
