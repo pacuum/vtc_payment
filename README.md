@@ -1,6 +1,6 @@
 # VtcPayment
 
-This is a library to handle
+This is a library to handle payment using VTC Intercom gateway. VTC is a Vietnamese company.
 
 ## Installation
 
@@ -24,24 +24,24 @@ Or install it yourself as:
 
 #### Specific bank
 ```ruby
-  req = VtcPayment::Bank::Request::Bank::Vietcombank.new("ACCOUNT", 9999, "SECRET_KEY", "https://your.web.site/")
-  req.sandbox = true
-  params = {
-    amount: 100_000, # VND
-    order_id: Time.now.strftime("%Y%m%e%H%M%S"),
-  }
-  puts req.url(params)
+req = VtcPayment::Bank::Request::Bank::Vietcombank.new("ACCOUNT", 9999, "SECRET_KEY", "https://your.web.site/")
+req.sandbox = true
+params = {
+  amount: 100_000, # VND
+  order_id: Time.now.strftime("%Y%m%e%H%M%S"),
+}
+puts req.url(params)
 ```
 See official document for available list of Bank names. Note that in the sandbox environment bank transfer will not work.
 
 #### VISA/Master Credit card
 ```ruby
-  req = VtcPayment::Bank::Request::CreditCard::Visa.new(account, website_id, secret_key, callback_url)
-  puts req.url(params)
+req = VtcPayment::Bank::Request::CreditCard::Visa.new(account, website_id, secret_key, callback_url)
+puts req.url(params)
 ```
 ```ruby
-  req = VtcPayment::Bank::Request::CreditCard::Master.new(account, website_id, secret_key, callback_url)
-  puts req.url(params)
+req = VtcPayment::Bank::Request::CreditCard::Master.new(account, website_id, secret_key, callback_url)
+puts req.url(params)
 ```
 The only difference among all cases is the class to instantiate.
 
@@ -50,24 +50,23 @@ When bank/credit card payment is successful, user is redirected to callback_url 
 ```ruby
 parser = VtpPayment::NotificationParser.new(SECRET_KEY)
 result = parser.parse_users_request(params)
-p [ result.successful?, result.code, result.message ]
-
+p [ result.successful?, result.order_id, result.amount, result.code, result.message ]
 ```
 
 #### Notification API
 ```ruby
 parser = VtpPayment::NotificationParser.new(SECRET_KEY)
 result = parser.parse_notification(data, signature)
-p [ result.successful?, result.code, result.message ]
+p [ result.successful?, result.order_id, result.amount, result.code, result.message ]
 
 ```
 
 ### Mobile card
 ```ruby
-  client = VtcPayment::MobileCard::Client.new("ACCOUNT", "SECRET_KEY")
-  client.sandbox = true
-  res =  client.execute("CARDID", "SERIAL", "any information of your customer")
-  p [ res.successful?, res.code, res.message ]
+client = VtcPayment::MobileCard::Client.new("ACCOUNT", "SECRET_KEY")
+client.sandbox = true
+client =  result.execute("CARDID", "SERIAL", "any information of your customer")
+p [ result.successful?, result.amount, result.code, result.message ] # it does not have order_id
 ```
 
 ## Development

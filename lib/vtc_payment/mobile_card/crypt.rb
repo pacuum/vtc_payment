@@ -7,16 +7,14 @@ module VtcPayment
     class Crypt
       class << self
         def encrypt( input, seed )
-          # padding
           input = input.to_s.strip;
           # it seems openssl automatically pad the string in the same way as php sample code
-          # input = input.to_s.ljust 8, '-'
 
           # encrypt
           cipher = OpenSSL::Cipher.new 'des-ede3' # tripledes-ebc
           cipher.encrypt
           cipher.key = md5_key(seed)
-          encrypted = cipher.update(input) + cipher.final  # .unpack("H*")
+          encrypted = cipher.update(input) + cipher.final
 
           return Base64.encode64(encrypted).gsub("\n", "");
         end
@@ -34,7 +32,7 @@ module VtcPayment
           cipher = OpenSSL::Cipher.new 'des-ede3' # tripledes-ebc
           cipher.decrypt
           cipher.key = key
-          plain = cipher.update(encrypted) + cipher.final  # .unpack("H*")
+          plain = cipher.update(encrypted) + cipher.final
 
           plain
         end

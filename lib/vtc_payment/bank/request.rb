@@ -108,7 +108,7 @@ module VtcPayment
           Currency::VND, # 1=VND, 2=USD
           params[:order_id],
           params[:amount].to_i.to_s, # VND only
-          @account, 
+          @account,
           screen_method(),
           @secret_key,
           @callback_url,

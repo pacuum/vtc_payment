@@ -77,12 +77,10 @@ module VtcPayment
         http_res = nil
         begin
           log [ :request, uri.to_s, headers, cardfun, xml_data ].to_json
-          #http_res = client.post(uri.to_s, header: headers.to_a, data: xml_data )
-          # http_res = client.post_content(uri.to_s, xml_data, headers )
           http_res = post( uri.to_s, headers, xml_data )
         rescue => ex
           log [ :exception, ex.to_s, ex.message ].to_json
-          # TODO: send email
+          # TODO: send email?
           return nil # we need to return nil because we have to process next card 
         ensure
           if http_res && http_res.respond_to?(:body)
@@ -136,7 +134,7 @@ module VtcPayment
           end
         end
 
-        attr_reader :body, :status, :telco_code, :transaction_id, :account_name, :vtc_description
+        attr_reader :body, :status, :telco_code, :transaction_id, :account_name, :vtc_description, :amount
         def initialize(http_response, secret_key)
           @body = http_response.body
           @status = http_response.code
@@ -148,7 +146,7 @@ module VtcPayment
           # even if card is wrong, it returns 200 status code
           # if the request format is wrong it will return 400 BadRequest
           (200..299).include?(@status.to_i) &&
-            code.nil?
+            @amount.present?
         end
 
         def http_status
@@ -156,11 +154,11 @@ module VtcPayment
         end
 
         def code
-          RESPONSE_CODE[@raw_code] && RESPONSE_CODE[@raw_code][:code]
+          RESPONSE_CODE[@error_code] && RESPONSE_CODE[@error_code][:code]
         end
 
         def message
-          RESPONSE_CODE[@raw_code] && RESPONSE_CODE[@raw_code][:message]
+          RESPONSE_CODE[@error_code] && RESPONSE_CODE[@error_code][:message]
         end
 
         private
@@ -174,9 +172,18 @@ module VtcPayment
 
             parse_xml(body) do |node, value|
               if node == "ResponseStatus"
-                @raw_code = value.to_i
+                value = value.to_i
+                if value > 0 # successful
+                  @amount = value
+                else
+                  @error_code = value
+                end
               elsif node == "Descripton" # not Description LOL
-                @description = value.to_s
+                if @error_code.nil?
+                  @telco_code, @transaction_id, @account_name, @vtc_description = parse_description( value )
+                else
+                  @error_message = value.to_s
+                end
               end
             end
           end
