@@ -67,7 +67,7 @@ p [ result.successful?, result.order_id, result.amount, result.code, result.mess
 VtcPayment::MobileCard::Client.production_url = "..." # set if you use in production
 client = VtcPayment::MobileCard::Client.new("ACCOUNT", "SECRET_KEY")
 client.sandbox = true
-client =  result.execute("CARDID", "SERIAL", "any information of your customer")
+result =  client.execute("CARDID", "SERIAL", "any information of your customer")
 p [ result.successful?, result.amount, result.code, result.message ] # it does not have order_id
 ```
 
