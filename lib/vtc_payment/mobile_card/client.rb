@@ -123,7 +123,7 @@ module VtcPayment
 
       def log_dir
         if defined?(Rails)
-          "#{Rails.root}/logs"
+          "#{Rails.root}/log"
         else
           "."
         end
