@@ -84,7 +84,7 @@ module VtcPayment
 
         http_res = nil
         begin
-          log [ :request, url, headers, cardfun, xml_data ].to_json
+          log [ :request, url, headers, xml_data ].to_json
           http_res = post( url, headers, xml_data )
         rescue => ex
           log [ :exception, ex.to_s, ex.message ].to_json
