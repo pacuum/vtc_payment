@@ -145,7 +145,7 @@ module VtcPayment
           end
         end
 
-        attr_reader :body, :status, :telco_code, :transaction_id, :account_name, :vtc_description, :amount, :error_code
+        attr_reader :body, :status, :telco_code, :transaction_id, :account_name, :vtc_description, :amount
         def initialize(http_response, secret_key)
           @body = http_response.body
           @status = http_response.code
