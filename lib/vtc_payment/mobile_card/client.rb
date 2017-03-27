@@ -221,7 +221,6 @@ module VtcPayment
         # but in 1.4.1 it says it contains an error message
         # seems 1.4.1 is right
         def parse_description( description )
-          raise "do not call this methods. I am an unwanted child of VTC"
           ary = description.to_s.split("|")
           if ary.size == 4
             return ary
