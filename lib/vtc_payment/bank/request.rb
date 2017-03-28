@@ -63,7 +63,7 @@ module VtcPayment
         def screen_method
           "PaymentType:Visa;"
         end
-        %W(Visa Mastercard).each do |card|
+        %W(Visa Master).each do |card|
           module_eval <<-EOS
             class #{card} < CreditCard
               def screen_method
